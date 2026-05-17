@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dogwood – Shift Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1B3A5C;
+    --gold: #C89B3C;
+    --gold-light: #e8b84b;
+    --cream: #FAF7F2;
+    --morning: #F97316;
+    --morning-bg: #FFF7ED;
+    --morning-mid: #FDBA74;
+    --mid: #0EA5E9;
+    --mid-bg: #F0F9FF;
+    --mid-light: #7DD3FC;
+    --night: #7C3AED;
+    --night-bg: #FAF5FF;
+    --night-light: #C4B5FD;
+    --done: #10B981;
+    --done-bg: #ECFDF5;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    color: #1a1a1a;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--navy);
+    padding: 28px 32px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    border: 2px solid rgba(200,155,60,0.25);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 40%;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    border: 1px solid rgba(200,155,60,0.15);
+  }
+  .header-inner { position: relative; z-index: 1; }
+  .brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .header-date {
+    margin-top: 14px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* PROGRESS GLOBAL */
+  .global-progress {
+    background: white;
+    border-bottom: 1px solid #eee;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .global-label { font-size: 12px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+  .progress-bar-wrap { flex: 1; background: #f0f0f0; border-radius: 99px; height: 8px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 99px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+  .global-pct { font-size: 14px; font-weight: 700; color: var(--navy); min-width: 36px; text-align: right; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: white;
+    border-bottom: 2px solid #f0f0f0;
+    padding: 0 16px;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #999;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .tab.morning.active { color: var(--morning); border-bottom-color: var(--morning); }
+  .tab.mid.active    { color: var(--mid);     border-bottom-color: var(--mid); }
+  .tab.night.active  { color: var(--night);   border-bottom-color: var(--night); }
+  .tab:hover { color: #444; }
+  .tab-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .tab.morning .tab-dot { background: var(--morning); }
+  .tab.mid     .tab-dot { background: var(--mid); }
+  .tab.night   .tab-dot { background: var(--night); }
+
+  /* PANEL */
+  .panel { display: none; padding: 0 0 80px; }
+  .panel.active { display: block; }
+
+  /* SHIFT HERO */
+  .shift-hero {
+    padding: 20px 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .shift-hero-left {}
+  .shift-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .shift-hours {
+    font-size: 13px;
+    color: #888;
+    margin-top: 3px;
+    font-weight: 500;
+  }
+  .shift-ring {
+    width: 72px; height: 72px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .shift-ring svg { width: 72px; height: 72px; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke-width: 6; }
+  .ring-fill { fill: none; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 176; transition: stroke-dashoffset 0.6s cubic-bezier(.4,0,.2,1); }
+  .ring-text {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+
+  /* SECTION */
+  .section { margin: 0 16px 16px; border-radius: 14px; overflow: hidden; background: white; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .section-header {
+    padding: 14px 18px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-title-row { display: flex; align-items: center; gap: 10px; }
+  .section-icon { font-size: 18px; }
+  .section-title { font-size: 14px; font-weight: 700; color: var(--navy); }
+  .section-count {
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 99px;
+    background: #f5f5f5; color: #777;
+  }
+  .section-arrow { font-size: 12px; color: #bbb; transition: transform 0.25s; }
+  .section.collapsed .section-arrow { transform: rotate(-90deg); }
+  .section-body { border-top: 1px solid #f5f5f5; }
+  .section.collapsed .section-body { display: none; }
+
+  /* TASK ITEM */
+  .task {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 13px 18px;
+    border-bottom: 1px solid #f9f9f9;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .task:last-child { border-bottom: none; }
+  .task:hover { background: #fafafa; }
+  .task.done { background: var(--done-bg); }
+  .task-check {
+    width: 22px; height: 22px; flex-shrink: 0;
+    border-radius: 6px;
+    border: 2px solid #ddd;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+    transition: all 0.2s;
+    font-size: 13px;
+  }
+  .task.done .task-check {
+    background: var(--done);
+    border-color: var(--done);
+    color: white;
+  }
+  .task-text {
+    font-size: 14px; line-height: 1.5; color: #333; font-weight: 400;
+    transition: all 0.2s;
+  }
+  .task.done .task-text { color: #aaa; text-decoration: line-through; }
+  .task-tag {
+    margin-top: 3px;
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 7px; border-radius: 4px;
+  }
+
+  /* PRIORITY BADGE */
+  .priority-badge {
+    flex-shrink: 0;
+    margin-top: 2px;
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .p-high   { background: #EF4444; }
+  .p-medium { background: var(--gold); }
+  .p-low    { background: #94A3B8; }
+
+  /* RESET BTN */
+  .reset-btn {
+    margin: 12px 16px 0;
+    width: calc(100% - 32px);
+    padding: 11px;
+    border-radius: 10px;
+    border: 1.5px dashed #ddd;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #aaa;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: #bbb; color: #777; background: #f9f9f9; }
+
+  /* COLORS PER SHIFT */
+  .morning .shift-name { color: var(--morning); }
+  .morning .section-header { background: var(--morning-bg); }
+  .morning .task-tag { background: #FEE2E2; color: var(--morning); }
+  .morning .ring-bg { stroke: #FED7AA; }
+  .morning .ring-fill { stroke: var(--morning); }
+  .morning .ring-text { color: var(--morning); }
+  .morning .task.done .task-check { background: var(--morning); border-color: var(--morning); }
+
+  .mid .shift-name { color: var(--mid); }
+  .mid .section-header { background: var(--mid-bg); }
+  .mid .task-tag { background: #E0F2FE; color: var(--mid); }
+  .mid .ring-bg { stroke: #BAE6FD; }
+  .mid .ring-fill { stroke: var(--mid); }
+  .mid .ring-text { color: var(--mid); }
+  .mid .task.done .task-check { background: var(--mid); border-color: var(--mid); }
+
+  .night .shift-name { color: var(--night); }
+  .night .section-header { background: var(--night-bg); }
+  .night .task-tag { background: #EDE9FE; color: var(--night); }
+  .night .ring-bg { stroke: #DDD6FE; }
+  .night .ring-fill { stroke: var(--night); }
+  .night .ring-text { color: var(--night); }
+  .night .task.done .task-check { background: var(--night); border-color: var(--night); }
+
+  /* COMPLETE BANNER */
+  .complete-banner {
+    display: none;
+    margin: 12px 16px;
+    padding: 14px 18px;
+    background: var(--done-bg);
+    border: 1.5px solid #6EE7B7;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #065F46;
+    text-align: center;
+  }
+  .complete-banner.show { display: block; animation: pop 0.3s ease; }
+  @keyframes pop { 0%{transform:scale(.95);opacity:0} 100%{transform:scale(1);opacity:1} }
+
+  /* SCROLL */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 99px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="brand">DOGWOOD</div>
+    <div class="subtitle">Southern Table &amp; Bar</div>
+    <div class="header-date" id="headerDate"></div>
+  </div>
+</div>
+
+<div class="global-progress">
+  <span class="global-label">Overall</span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="globalBar" style="width:0%"></div>
+  </div>
+  <span class="global-pct" id="globalPct">0%</span>
+</div>
+
+<div class="tabs">
+  <button class="tab morning active" onclick="switchTab('morning')">
+    <span class="tab-dot"></span> ☀️ Morning <span id="tab-count-morning"></span>
+  </button>
+  <button class="tab mid" onclick="switchTab('mid')">
+    <span class="tab-dot"></span> 🌤️ Mid <span id="tab-count-mid"></span>
+  </button>
+  <button class="tab night" onclick="switchTab('night')">
+    <span class="tab-dot"></span> 🌙 Night <span id="tab-count-night"></span>
+  </button>
+</div>
+
+<!-- MORNING -->
+<div class="panel morning active" id="panel-morning">
+  <div class="shift-hero morning">
+    <div class="shift-hero-left">
+      <div class="shift-name morning">Morning Shift</div>
+      <div class="shift-hours">☀️ 10:30 AM – 5:00 PM</div>
+    </div>
+    <div class="shift-ring morning">
+      <svg viewBox="0 0 60 60">
+        <circle class="ring-bg" cx="30" cy="30" r="28"/>
+        <circle class="ring-fill" cx="30" cy="30" r="28" id="ring-morning" style="stroke-dashoffset:176"/>
+      </svg>
+      <div class="ring-text morning" id="pct-morning">0%</div>
+    </div>
+  </div>
+
+  <div class="complete-banner" id="banner-morning">✅ Shift complete! Great work.</div>
+
+  <div class="section morning" id="sec-m-1">
+    <div class="section-header" onclick="toggleSection('sec-m-1')">
+      <div class="section-title-row">
+        <span class="section-icon">🛏️</span>
+        <span class="section-title">Opening & Setup</span>
+        <span class="section-count" id="cnt-sec-m-1">0/5</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Linens to par: 2x 80", 1x 40", 3 backups</div><span class="task-tag">Setup</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Silverware to par (2 full bins)</div><span class="task-tag">Setup</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Set bus tubs in position (wells 1-3)</div><span class="task-tag">Setup</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Stock condiments and plates at stations</div><span class="task-tag">Setup</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Assist with general bar prep</div><span class="task-tag">Bar</span></div></div>
+    </div>
+  </div>
+
+  <div class="section morning" id="sec-m-2">
+    <div class="section-header" onclick="toggleSection('sec-m-2')">
+      <div class="section-title-row">
+        <span class="section-icon">🧊</span>
+        <span class="section-title">Ice & Glassware</span>
+        <span class="section-count" id="cnt-sec-m-2">0/4</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">At least one ice well completely full (confirm which one with bartender)</div><span class="task-tag">🔴 Priority</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">At least one black Cambro in micro kitchen full of Kold Draft Ice (1" cubes)</div><span class="task-tag">🔴 Priority</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Refill ice at stations and polish glassware</div><span class="task-tag">Bar</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Verify dishwasher is clean and ready</div><span class="task-tag">Dishes</span></div></div>
+    </div>
+  </div>
+
+  <div class="section morning" id="sec-m-3">
+    <div class="section-header" onclick="toggleSection('sec-m-3')">
+      <div class="section-title-row">
+        <span class="section-icon">🍋</span>
+        <span class="section-title">Bartender Support</span>
+        <span class="section-count" id="cnt-sec-m-3">0/1</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Check in with bartender for any additional needs</div><span class="task-tag">Bar</span></div></div>
+    </div>
+  </div>
+
+  <div class="section morning" id="sec-m-4">
+    <div class="section-header" onclick="toggleSection('sec-m-4')">
+      <div class="section-title-row">
+        <span class="section-icon">🧹</span>
+        <span class="section-title">End of Shift</span>
+        <span class="section-count" id="cnt-sec-m-4">0/3</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Run glassware through the dishwasher if needed</div><span class="task-tag">Dishes</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Empty all bus bins before leaving</div><span class="task-tag">Cleaning</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Confirm sign-out with the manager</div><span class="task-tag">Admin</span></div></div>
+    </div>
+  </div>
+
+  <button class="reset-btn" onclick="resetPanel('morning')">↺ Reset checklist</button>
+</div>
+
+<!-- MID -->
+<div class="panel mid" id="panel-mid">
+  <div class="shift-hero mid">
+    <div class="shift-hero-left">
+      <div class="shift-name mid">Mid Shift</div>
+      <div class="shift-hours">🌤️ 11:30 AM – 8:00 PM</div>
+    </div>
+    <div class="shift-ring mid">
+      <svg viewBox="0 0 60 60">
+        <circle class="ring-bg" cx="30" cy="30" r="28"/>
+        <circle class="ring-fill" cx="30" cy="30" r="28" id="ring-mid" style="stroke-dashoffset:176"/>
+      </svg>
+      <div class="ring-text mid" id="pct-mid">0%</div>
+    </div>
+  </div>
+
+  <div class="complete-banner" id="banner-mid">✅ Shift complete! Great work.</div>
+
+  <div class="section mid" id="sec-d-1">
+    <div class="section-header" onclick="toggleSection('sec-d-1')">
+      <div class="section-title-row">
+        <span class="section-icon">⚡</span>
+        <span class="section-title">Goal: Before 4:00 PM</span>
+        <span class="section-count" id="cnt-sec-d-1">0/7</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Liquor cage emptied and stocked correctly (with manager)</div><span class="task-tag">🔴 Priority</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">All ice wells full of Kold Draft Ice (1" cubes)</div><span class="task-tag">🔴 Priority</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">All 3 black Cambros in micro kitchen full of Kold Draft Ice</div><span class="task-tag">🔴 Priority</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">All bus tubs empty and in position (wells 1-3)</div><span class="task-tag">Bar</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Beer and wine restocked after lunch service (FIFO)</div><span class="task-tag">Restock</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Glassware stocked and dishwashers emptied and reloaded</div><span class="task-tag">Dishes</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Assist bartenders: fruit, juices, syrups and other supplies</div><span class="task-tag">Bar</span></div></div>
+    </div>
+  </div>
+
+  <div class="section mid" id="sec-d-2">
+    <div class="section-header" onclick="toggleSection('sec-d-2')">
+      <div class="section-title-row">
+        <span class="section-icon">🍽️</span>
+        <span class="section-title">During Service</span>
+        <span class="section-count" id="cnt-sec-d-2">0/4</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Run food during peak service</div><span class="task-tag">Service</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Restock using FIFO (spirits, beer, wine)</div><span class="task-tag">Restock</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Clear dish rack in micro kitchen</div><span class="task-tag">Cleaning</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Check condiments and to-go supplies</div><span class="task-tag">Setup</span></div></div>
+    </div>
+  </div>
+
+  <div class="section mid" id="sec-d-3">
+    <div class="section-header" onclick="toggleSection('sec-d-3')">
+      <div class="section-title-row">
+        <span class="section-icon">🔄</span>
+        <span class="section-title">Priority Cycle (repeat)</span>
+        <span class="section-count" id="cnt-sec-d-3">0/4</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Glassware: clear landing area and stock stations</div><span class="task-tag">🔴 #1</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Ice: wells at 50% or less = refill immediately</div><span class="task-tag">🔴 #2</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Bus tubs: take full ones to dish pit and replace</div><span class="task-tag">#3</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Check in with bartenders: juices, syrups, beer, wine</div><span class="task-tag">#4</span></div></div>
+    </div>
+  </div>
+
+  <div class="section mid" id="sec-d-4">
+    <div class="section-header" onclick="toggleSection('sec-d-4')">
+      <div class="section-title-row">
+        <span class="section-icon">🧹</span>
+        <span class="section-title">End of Shift</span>
+        <span class="section-count" id="cnt-sec-d-4">0/2</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Leave work area clean and organized</div><span class="task-tag">Cleaning</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Confirm sign-out with the manager</div><span class="task-tag">Admin</span></div></div>
+    </div>
+  </div>
+
+  <button class="reset-btn" onclick="resetPanel('mid')">↺ Reset checklist</button>
+</div>
+
+<!-- NIGHT -->
+<div class="panel night" id="panel-night">
+  <div class="shift-hero night">
+    <div class="shift-hero-left">
+      <div class="shift-name night">Night / Bar Shift</div>
+      <div class="shift-hours">🌙 5:00 PM – 12:30 AM</div>
+    </div>
+    <div class="shift-ring night">
+      <svg viewBox="0 0 60 60">
+        <circle class="ring-bg" cx="30" cy="30" r="28"/>
+        <circle class="ring-fill" cx="30" cy="30" r="28" id="ring-night" style="stroke-dashoffset:176"/>
+      </svg>
+      <div class="ring-text night" id="pct-night">0%</div>
+    </div>
+  </div>
+
+  <div class="complete-banner" id="banner-night">✅ Shift complete! Great work.</div>
+
+  <div class="section night" id="sec-n-1">
+    <div class="section-header" onclick="toggleSection('sec-n-1')">
+      <div class="section-title-row">
+        <span class="section-icon">🥂</span>
+        <span class="section-title">Glassware (Priority #1)</span>
+        <span class="section-count" id="cnt-sec-n-1">0/5</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Clear the bar entrance landing area immediately</div><span class="task-tag">🔴 Urgent</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Wash, polish and restock glassware continuously</div><span class="task-tag">🔴 Urgent</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Check Well #4 first — it usually needs glassware the most</div><span class="task-tag">Bar</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Distribute clean glasses evenly across all stations</div><span class="task-tag">Bar</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Dishwasher: always loaded and running during service</div><span class="task-tag">Dishes</span></div></div>
+    </div>
+  </div>
+
+  <div class="section night" id="sec-n-2">
+    <div class="section-header" onclick="toggleSection('sec-n-2')">
+      <div class="section-title-row">
+        <span class="section-icon">🧊</span>
+        <span class="section-title">Ice & Bus Tubs</span>
+        <span class="section-count" id="cnt-sec-n-2">0/4</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Check all wells — refill if at 50% or less</div><span class="task-tag">🔴 Priority</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Keep black Cambros full of Kold Draft Ice</div><span class="task-tag">Ice</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Full bus tubs → take to dish pit and replace immediately</div><span class="task-tag">🔴 Priority</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Keep empty bus tubs always available at the wells</div><span class="task-tag">Bar</span></div></div>
+    </div>
+  </div>
+
+  <div class="section night" id="sec-n-3">
+    <div class="section-header" onclick="toggleSection('sec-n-3')">
+      <div class="section-title-row">
+        <span class="section-icon">🍾</span>
+        <span class="section-title">Restock & Service</span>
+        <span class="section-count" id="cnt-sec-n-3">0/4</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Restock beer and wine using FIFO</div><span class="task-tag">Restock</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Run food and support floor service</div><span class="task-tag">Service</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Assist with table resets</div><span class="task-tag">Floor</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Take out trash and empty bottles</div><span class="task-tag">Cleaning</span></div></div>
+    </div>
+  </div>
+
+  <div class="section night" id="sec-n-4">
+    <div class="section-header" onclick="toggleSection('sec-n-4')">
+      <div class="section-title-row">
+        <span class="section-icon">🌙</span>
+        <span class="section-title">Night Close</span>
+        <span class="section-count" id="cnt-sec-n-4">0/5</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Remove linens and clean mats</div><span class="task-tag">Cleaning</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Clear dish rack in micro kitchen</div><span class="task-tag">Cleaning</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Wash and put away all remaining glassware</div><span class="task-tag">Dishes</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Leave bar area clean and organized for the next shift</div><span class="task-tag">Cleaning</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Confirm sign-out with the manager</div><span class="task-tag">Admin</span></div></div>
+    </div>
+  </div>
+
+  <div class="section night" id="sec-n-5">
+    <div class="section-header" onclick="toggleSection('sec-n-5')">
+      <div class="section-title-row">
+        <span class="section-icon">⚙️</span>
+        <span class="section-title">Cardinal Clean</span>
+        <span class="section-count" id="cnt-sec-n-5">0/5</span>
+      </div>
+      <span class="section-arrow">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Clean milk and coffee systems</div><span class="task-tag">Cardinal</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Run cleaning cycle with tablet + Eco Blue</div><span class="task-tag">Cardinal</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Empty coffee urn and wipe all surfaces</div><span class="task-tag">Cardinal</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Complete daily special task (Mon: Fridges · Tue: Tables · Wed: Utensils · Thu: Filters · Fri: Glassware)</div><span class="task-tag">Weekly</span></div></div>
+      <div class="task" onclick="toggle(this)"><div class="task-check"></div><div><div class="task-text">Verify Cardinal area is clean and ready for next shift</div><span class="task-tag">Cardinal</span></div></div>
+    </div>
+  </div>
+
+  <button class="reset-btn" onclick="resetPanel('night')">↺ Reset checklist</button>
+</div>
+
+<script>
+// Date
+const d = new Date();
+document.getElementById('headerDate').textContent =
+  d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+// Toggle task
+function toggle(el) {
+  el.classList.toggle('done');
+  el.querySelector('.task-check').textContent = el.classList.contains('done') ? '✓' : '';
+  updateAll();
+}
+
+// Toggle section collapse
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+// Switch tab
+function switchTab(shift) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + shift).classList.add('active');
+  document.querySelector('.tab.' + shift).classList.add('active');
+}
+
+// Get panel tasks
+function getPanelTasks(panelId) {
+  const panel = document.getElementById('panel-' + panelId);
+  const all = panel.querySelectorAll('.task');
+  const done = panel.querySelectorAll('.task.done');
+  return { total: all.length, done: done.length };
+}
+
+// Update ring + pct + tab count
+function updateShift(shift) {
+  const { total, done } = getPanelTasks(shift);
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  const circ = 176;
+  const offset = circ - (circ * pct / 100);
+  document.getElementById('ring-' + shift).style.strokeDashoffset = offset;
+  document.getElementById('pct-' + shift).textContent = pct + '%';
+  document.getElementById('tab-count-' + shift).textContent = done + '/' + total;
+  // banner
+  const banner = document.getElementById('banner-' + shift);
+  if (pct === 100) banner.classList.add('show');
+  else banner.classList.remove('show');
+  // section counts
+  const panel = document.getElementById('panel-' + shift);
+  panel.querySelectorAll('.section').forEach(sec => {
+    const id = sec.id;
+    const secTasks = sec.querySelectorAll('.task');
+    const secDone = sec.querySelectorAll('.task.done');
+    const el = document.getElementById('cnt-' + id);
+    if (el) el.textContent = secDone.length + '/' + secTasks.length;
+  });
+}
+
+// Global progress
+function updateGlobal() {
+  let total = 0, done = 0;
+  ['morning','mid','night'].forEach(s => {
+    const r = getPanelTasks(s);
+    total += r.total; done += r.done;
+  });
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  document.getElementById('globalBar').style.width = pct + '%';
+  document.getElementById('globalPct').textContent = pct + '%';
+}
+
+function updateAll() {
+  ['morning','mid','night'].forEach(updateShift);
+  updateGlobal();
+}
+
+// Reset panel
+function resetPanel(shift) {
+  const panel = document.getElementById('panel-' + shift);
+  panel.querySelectorAll('.task').forEach(t => {
+    t.classList.remove('done');
+    t.querySelector('.task-check').textContent = '';
+  });
+  updateAll();
+}
+
+// Init
+updateAll();
+</script>
+</body>
+</html>
